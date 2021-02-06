@@ -5,6 +5,7 @@
 .DESCRIPTION
    Long description
     2020-11-18 Sukri Created.
+    2021-02-06 Sukri Imported some external modules.
 .EXAMPLE
    Example of how to use this cmdlet
 .EXAMPLE
@@ -25,14 +26,15 @@
    The functionality that best describes this cmdlet
 #>
 
-#get boolean value if script ran with administration right.
-$IsAdministrator = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+#import the external functions from the external script files.
+. "$PSScriptRoot\Get-AdministrationRight"
 
 #throw exception if no administration right.
+$IsAdministrator = Get-AdministrationRight
+
 if ($IsAdministrator -ne $true)
 {
-    Write-Warning -Message "Please run script with administrator right." -WarningAction Stop
-    Exit-PSSession
+    Write-Warning -Message "You are currently running this script WITHOUT the administration right. Please run with administration right. Exit." -WarningAction Stop
 }
 
 #function use to install silently *.msi binary file format.
@@ -181,4 +183,11 @@ function Install-MSIApplication
     }
 }
 
+#log the logging into log file.
+Start-Transcript -Path "$PSScriptRoot\$( $MyInvocation.ScriptName )"
+
+#execute the function.
 Install-MSIApplication
+
+#stop to log the logging.
+Stop-Transcript
